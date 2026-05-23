@@ -6,7 +6,7 @@
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <AssemblyName>AudioDeviceSwitcher</AssemblyName>
     <RootNamespace>AudioDeviceSwitcher</RootNamespace>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Authors>Chester</Authors>
     <Company>Chester</Company>
     <Product>Audio Device Switcher</Product>
