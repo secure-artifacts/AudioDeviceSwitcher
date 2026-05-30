@@ -24,13 +24,8 @@ public static class AppProfileService
 
     public static List<AppProfile> GetAll()
     {
-        if (!File.Exists(FilePath)) return [];
-        try
-        {
-            var json = File.ReadAllText(FilePath);
-            return JsonSerializer.Deserialize<List<AppProfile>>(json, JsonOptions) ?? [];
-        }
-        catch { return []; }
+        // Crash-safe load: recovers from .bak if app-profiles.json is corrupt (see JsonStore).
+        return JsonStore.Read<List<AppProfile>>(FilePath, JsonOptions) ?? [];
     }
 
     public static AppProfile? Get(Guid id) => GetAll().Find(p => p.Id == id);
@@ -53,7 +48,6 @@ public static class AppProfileService
 
     private static void WriteAll(List<AppProfile> profiles)
     {
-        Directory.CreateDirectory(Dir);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(profiles, JsonOptions));
+        JsonStore.WriteAtomic(FilePath, JsonSerializer.Serialize(profiles, JsonOptions));
     }
 }

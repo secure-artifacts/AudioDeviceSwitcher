@@ -40,11 +40,8 @@ public static class ProfileService
 
     public static List<DeviceProfile> GetAll()
     {
-        if (!File.Exists(ProfilePath))
-            return [];
-
-        var json = File.ReadAllText(ProfilePath);
-        var list = JsonSerializer.Deserialize<List<DeviceProfile>>(json, JsonOptions) ?? [];
+        // Crash-safe load: recovers from .bak if profiles.json is corrupt (see JsonStore).
+        var list = JsonStore.Read<List<DeviceProfile>>(ProfilePath, JsonOptions) ?? [];
         // Stable sort: profiles without an explicit Order keep their JSON order.
         return list.OrderBy(p => p.Order).ToList();
     }
@@ -78,8 +75,7 @@ public static class ProfileService
 
     private static void WriteAll(List<DeviceProfile> profiles)
     {
-        Directory.CreateDirectory(ProfileDir);
         var json = JsonSerializer.Serialize(profiles, JsonOptions);
-        File.WriteAllText(ProfilePath, json);
+        JsonStore.WriteAtomic(ProfilePath, json);
     }
 }

@@ -112,6 +112,9 @@
             <MenuItem Header="&#x6587;&#x4EF6;">
                 <MenuItem Header="&#x5237;&#x65B0;" Click="Refresh_Click"/>
                 <Separator/>
+                <MenuItem Header="&#x5BFC;&#x51FA;&#x914D;&#x7F6E;&#x2026;" Click="ExportConfig_Click"/>
+                <MenuItem Header="&#x5BFC;&#x5165;&#x914D;&#x7F6E;&#x2026;" Click="ImportConfig_Click"/>
+                <Separator/>
                 <MenuItem Header="&#x9000;&#x51FA;" Click="ExitApp_Click"/>
             </MenuItem>
             <MenuItem Header="&#x89C6;&#x56FE;">

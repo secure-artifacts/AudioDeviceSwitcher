@@ -2110,6 +2110,64 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ExportConfig_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "导出配置",
+            Filter = "配置备份 (*.json)|*.json",
+            FileName = $"AudioDeviceSwitcher-backup-{DateTime.Now:yyyyMMdd}.json",
+            DefaultExt = ".json",
+        };
+        if (dlg.ShowDialog(this) != true) return;
+        try
+        {
+            BackupService.Export(dlg.FileName);
+            MessageBox.Show("配置已导出。", "导出配置", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"导出失败：\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ImportConfig_Click(object sender, RoutedEventArgs e)
+    {
+        if (((App)Application.Current).IsAnyProfileLocked())
+        {
+            MessageBox.Show("已锁定 — 请先解锁配置再导入。", "导入配置",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "导入配置",
+            Filter = "配置备份 (*.json)|*.json|所有文件 (*.*)|*.*",
+            CheckFileExists = true,
+        };
+        if (dlg.ShowDialog(this) != true) return;
+        try
+        {
+            var (profiles, appProfiles, nicknames) = BackupService.ImportMerge(dlg.FileName);
+
+            // Imported profiles may carry hotkeys; rebuild registrations and refresh both windows.
+            RegisterProfileHotkeys();
+            _lastStateSignature = "";
+            RefreshFromExternalChange();
+            LoadProfiles();
+            _miniWindow?.LoadProfiles();
+
+            MessageBox.Show(
+                $"导入完成（合并）：\n配置 {profiles} 个、应用预设 {appProfiles} 个、设备别名 {nicknames} 个。",
+                "导入配置", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"导入失败：\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void OpenAbout_Click(object sender, RoutedEventArgs e)
     {
         var dlg = new AboutWindow { Owner = this };

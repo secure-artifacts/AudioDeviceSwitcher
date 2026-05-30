@@ -55,30 +55,16 @@ public static class SettingsService
     public static AppSettings Load()
     {
         if (_cached != null) return _cached;
-
-        if (!File.Exists(SettingsPath))
-        {
-            _cached = new AppSettings();
-            return _cached;
-        }
-
-        try
-        {
-            var json = File.ReadAllText(SettingsPath);
-            _cached = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-        }
-        catch
-        {
-            _cached = new AppSettings();
-        }
+        // Crash-safe load: a corrupt settings.json is recovered from .bak (or preserved as
+        // .corrupt-* and reset), instead of being silently replaced with defaults (see JsonStore).
+        _cached = JsonStore.Read<AppSettings>(SettingsPath, JsonOptions) ?? new AppSettings();
         return _cached;
     }
 
     public static void Save()
     {
         if (_cached == null) return;
-        Directory.CreateDirectory(SettingsDir);
         var json = JsonSerializer.Serialize(_cached, JsonOptions);
-        File.WriteAllText(SettingsPath, json);
+        JsonStore.WriteAtomic(SettingsPath, json);
     }
 }
